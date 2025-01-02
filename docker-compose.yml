@@ -24,6 +24,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+  
   rest:
     container_name: "rest"
     build: rest/.
@@ -56,7 +57,8 @@ services:
         SERVICE_LIST: "word_frequency,chapter_title,format_check,chapter_summarization,page_count,table_of_content,citation,table_figure_detection,grammar"
         GUIDELINES_LIST: "chapter_title,format_check,page_count"
         GOOGLE_APPLICATION_CREDENTIALS: "/run/secrets/gcp-credentials"
-        GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket"
+        GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188"
+  
   client:
     container_name: "client"
     build: client/.
@@ -69,6 +71,7 @@ services:
     environment:
       REACT_APP_SERVICE_LIST: "word_frequency,chapter_title,format_check,chapter_summarization,page_count,table_of_content,citation,table_figure_detection,grammar"
       REACT_APP_BACKEND_HOST: "http://localhost:5000/"
+  
   chapter_title:
     container_name: "chapter_title"
     build: chapter_title/.
@@ -95,9 +98,10 @@ services:
       DATABASE_PASSWORD: "123456"
       DATABASE_HOST: "postgresql"
       DATABASE_PORT: "5432"
-      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket"
+      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188"
       GOOGLE_APPLICATION_CREDENTIALS: "/app/google_credentials.json"
       ROOT_DIR: "/app"
+  
   format_check:
     container_name: "format_check"
     build: format_check/.
@@ -124,9 +128,10 @@ services:
       DATABASE_PASSWORD: "123456"
       DATABASE_HOST: "postgresql"
       DATABASE_PORT: "5432"
-      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket"
+      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188"
       GOOGLE_APPLICATION_CREDENTIALS: "/app/google_credentials.json"
       ROOT_DIR: "/app"
+  
   page_count:
     container_name: "page_count"
     build: page_count/.
@@ -153,9 +158,10 @@ services:
       DATABASE_PASSWORD: "123456"
       DATABASE_HOST: "postgresql"
       DATABASE_PORT: "5432"
-      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket"
+      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188"
       GOOGLE_APPLICATION_CREDENTIALS: "/app/google_credentials.json"
       ROOT_DIR: "/app"
+  
   table_of_content:
     container_name: "table_of_content"
     build: table_of_content/.
@@ -182,9 +188,10 @@ services:
       DATABASE_PASSWORD: "123456"
       DATABASE_HOST: "postgresql"
       DATABASE_PORT: "5432"
-      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket"
+      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188"
       GOOGLE_APPLICATION_CREDENTIALS: "/app/google_credentials.json"
       ROOT_DIR: "/app"
+  
   word_frequency:
     container_name: "word_frequency"
     build: word_frequency/.
@@ -211,9 +218,10 @@ services:
       DATABASE_PASSWORD: "123456"
       DATABASE_HOST: "postgresql"
       DATABASE_PORT: "5432"
-      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket"
+      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188"
       GOOGLE_APPLICATION_CREDENTIALS: "/app/google_credentials.json"
       ROOT_DIR: "/app"
+  
   chapter_summarization:
     container_name: "chapter_summarization"
     build: chapter_summarization/.
@@ -240,9 +248,10 @@ services:
       DATABASE_PASSWORD: "123456"
       DATABASE_HOST: "postgresql"
       DATABASE_PORT: "5432"
-      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket"
+      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188"
       GOOGLE_APPLICATION_CREDENTIALS: "/app/google_credentials.json"
       ROOT_DIR: "/app"
+  
   citation:
     container_name: "citation"
     build: citation/.
@@ -269,9 +278,10 @@ services:
       DATABASE_PASSWORD: "123456"
       DATABASE_HOST: "postgresql"
       DATABASE_PORT: "5432"
-      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket"
+      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188"
       GOOGLE_APPLICATION_CREDENTIALS: "/app/google_credentials.json"
       ROOT_DIR: "/app"
+  
   table_figure_detection:
     container_name: "table_figure_detection"
     build: table_figure_detection/.
@@ -298,9 +308,10 @@ services:
       DATABASE_PASSWORD: "123456"
       DATABASE_HOST: "postgresql"
       DATABASE_PORT: "5432"
-      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket"
+      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188"
       GOOGLE_APPLICATION_CREDENTIALS: "/app/google_credentials.json"
       ROOT_DIR: "/app"
+  
   grammar:
     container_name: "grammar"
     build: grammar/.
@@ -327,9 +338,40 @@ services:
       DATABASE_PASSWORD: "123456"
       DATABASE_HOST: "postgresql"
       DATABASE_PORT: "5432"
-      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket"
+      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188"
       GOOGLE_APPLICATION_CREDENTIALS: "/app/google_credentials.json"
       ROOT_DIR: "/app"
+  
+  major_classifier:
+    container_name: "major_classifier"
+    build: major_classifier/.
+    image: "major_classifier:latest"
+    restart: "always"
+    ports:
+      - "5010:5010"
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./major_classifier/temp:/app/major_classifier/temp
+      - ./google_credentials.json:/app/google_credentials.json
+    environment:
+      APP_NAME: "major_classifier"
+      RABBITMQ_HOST: "rabbitmq"
+      RABBITMQ_USER: "guest"
+      RABBITMS_PORT: "5672"
+      RABBITMQ_PASSWORD: "guest"
+      DATABASE_NAME: "major_classifier"
+      DATABASE_USER: "postgres"
+      DATABASE_PASSWORD: "123456"
+      DATABASE_HOST: "postgresql"
+      DATABASE_PORT: "5432"
+      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188"
+      GOOGLE_APPLICATION_CREDENTIALS: "/app/google_credentials.json"
+      ROOT_DIR: "/app"
+  
   rabbitmq:
     container_name: "rabbitmq"
     build: rabbitmq/.
@@ -339,6 +381,7 @@ services:
       - RABBITMQ_DEFAULT_PASS=guest
     ports:
         - "5672:5672"
+        - "15672:15672"
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:15672"]

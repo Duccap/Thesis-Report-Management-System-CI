@@ -160,7 +160,7 @@ def get_summaries(chapter_content):
         
             output += "\n"
 
-    return output
+    return output 
 
 
 def insert_database(event_id, thesis_id, file_location, result):

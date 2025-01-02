@@ -54,6 +54,20 @@ CREATE TABLE public.output (
     uploaded_time timestamp with time zone NOT NULL
 );
 
+DROP DATABASE IF EXISTS major_classifier;
+CREATE DATABASE major_classifier;
+GRANT ALL PRIVILEGES ON DATABASE major_classifier TO postgres;
+\connect major_classifier;
+CREATE TABLE public.output (
+    id uuid NOT NULL PRIMARY KEY,
+    thesis_id character varying(255) NOT NULL,
+    file_name character varying(255) NOT NULL,
+    file_location character varying(255) NOT NULL,
+    result character varying(55),
+    grade character varying(55),
+    uploaded_time timestamp with time zone NOT NULL
+);
+
 DROP DATABASE IF EXISTS page_count;
 CREATE DATABASE page_count;
 GRANT ALL PRIVILEGES ON DATABASE page_count TO postgres;
@@ -190,7 +204,7 @@ INSERT INTO public.user_type(id, type_name) VALUES (1, 'Admin');
 INSERT INTO public.user_type(id, type_name) VALUES (2, 'Instructor');
 INSERT INTO public.user_type(id, type_name) VALUES (3, 'Student');
 
-INSERT INTO public.deadline (deadline) VALUES ('2024-12-01 00:00:00+07');
+INSERT INTO public.deadline (deadline) VALUES ('2026-12-01 00:00:00+07');
 
 INSERT INTO public.user (id, full_name, password, type_id) VALUES ('ITITADMIN01', 'Admin', '@IU_Ad#20/24', 1);
 

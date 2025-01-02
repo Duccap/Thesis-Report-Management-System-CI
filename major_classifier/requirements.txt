@@ -1,1 +1,6 @@
-pdfplumber==0.9.0
+pika
+psycopg2-binary==2.9.1
+pdfplumber
+language_tool_python
+python-dotenv
+google-cloud-storage
