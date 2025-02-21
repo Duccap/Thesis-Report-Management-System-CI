@@ -4,4 +4,4 @@ Note_For_Thesis.txt
 .vscode
 .py
 terraform/
-.txt
+*.txt
