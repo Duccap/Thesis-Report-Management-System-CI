@@ -50,7 +50,7 @@ def insert_database(event_id, thesis_id, file_location, major):
     uploaded_time = datetime.utcnow()
 
     db = Database()
-    db.insert("INSERT INTO major_output (id, thesis_id, file_name, file_location, major, uploaded_time) VALUES (%s, %s, %s, %s, %s, %s)",
+    db.insert("INSERT INTO output (id, thesis_id, file_name, file_location, result, uploaded_time) VALUES (%s, %s, %s, %s, %s, %s)",
               (event_id, thesis_id, file_name, file_location, major, uploaded_time))
 
     print("Inserted in database", flush=True)
@@ -68,12 +68,12 @@ def output_file(cloud_file_location):
     uploaded_file_location = get_file_from_bucket(cloud_file_location)
     producer.publish_status(event_id, thesis_id, service_type, "Processing")
 
+    output = ""
     try:
         # Classify major
         major = classify_major(uploaded_file_location)
 
         # Prepare output text
-        output = f"Thesis ID: {thesis_id}\n"
         output += f"Detected Major: {major}\n"
 
         # Write output to cloud bucket

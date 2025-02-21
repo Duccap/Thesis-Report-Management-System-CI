@@ -25,6 +25,18 @@ services:
       timeout: 5s
       retries: 3
   
+  cloudbeaver:
+    image: dbeaver/cloudbeaver:latest
+    container_name: cloudbeaver
+    ports:
+      - "8978:8978"
+    volumes:
+      - ./cloudbeaver-data:/opt/cloudbeaver/workspace
+    environment:
+      - CB_SERVER_NAME=CloudBeaver
+      - CB_ADMIN_NAME=admin
+      - CB_ADMIN_PASSWORD=admin
+
   rest:
     container_name: "rest"
     build: rest/.

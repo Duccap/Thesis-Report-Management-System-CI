@@ -1,0 +1,51 @@
+command:
+docker-compose up -d client rest postgresql rabbitmq major_classifier page_count word_frequency cloudbeaver
+docker logs -f --tail 20 <name> 
+
+accounts:
+cloudbeaver   #duccap-Ronsu220902
+
+problems:
+in major service
+docker logs -f --tail 20 major_classifier 
+
+
+Status of event 59abedc7-4ba3-4205-8c82-b7e843505d54 in major_classifier: Service error
+Received rest/9c22f5b5-1355-4005-b9e5-8c9dd7c9bcab.pdf
+
+Status of event a70451bb-dc0f-412d-ab5e-f401ad188631 in major_classifier: Processing
+File upload to major_classifier/9c22f5b5-1355-4005-b9e5-8c9dd7c9bcab.txt
+
+Time for major_classifier to process file 9c22f5b5-1355-4005-b9e5-8c9dd7c9bcab is 2.011331569000049
+
+Finished uploadidocker logs -f --tail 20 major_classifier 
+
+
+Status of event 59abedc7-4ba3-4205-8c82-b7e843505d54 in major_classifier: Service error
+Received rest/9c22f5b5-1355-4005-b9e5-8c9dd7c9bcab.pdf
+
+Status of event a70451bb-dc0f-412d-ab5e-f401ad188631 in major_classifier: Processing
+File upload to major_classifier/9c22f5b5-1355-4005-b9e5-8c9dd7c9bcab.txt
+
+Time for major_classifier to process file 9c22f5b5-1355-4005-b9e5-8c9dd7c9bcab is 2.011331569000049
+
+Finished uploading to bucket for major_classifier
+removed file at temp/9c22f5b5-1355-4005-b9e5-8c9dd7c9bcab.pdf
+connected to database major_classifier
+query = INSERT INTO major_output (id, thesis_id, file_name, file_location, major, uploaded_time) VALUES (%s, %s, %s, %s, %s, %s)
+Error during processing: relation "major_output" does not exist
+LINE 1: INSERT INTO major_output (id, thesis_id, file_name, file_loc...
+                    ^
+
+
+Status of event a70451bb-dc0f-412d-ab5e-f401ad188631 in major_classifier: Service error
+ng to bucket for major_classifier
+removed file at temp/9c22f5b5-1355-4005-b9e5-8c9dd7c9bcab.pdf
+connected to database major_classifier
+query = INSERT INTO major_output (id, thesis_id, file_name, file_location, major, uploaded_time) VALUES (%s, %s, %s, %s, %s, %s)
+Error during processing: relation "major_output" does not exist
+LINE 1: INSERT INTO major_output (id, thesis_id, file_name, file_loc...
+                    ^
+
+
+Status of event a70451bb-dc0f-412d-ab5e-f401ad188631 in major_classifier: Service error
