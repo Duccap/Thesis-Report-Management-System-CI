@@ -20,22 +20,11 @@ services:
       POSTGRES_PASSWORD: "123456"
       POSTGRES_DB: "thesis_upload"
     healthcheck:
-      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
-      retries: 3
+      retries: 5
   
-  cloudbeaver:
-    image: dbeaver/cloudbeaver:latest
-    container_name: cloudbeaver
-    ports:
-      - "8978:8978"
-    volumes:
-      - ./cloudbeaver-data:/opt/cloudbeaver/workspace
-    environment:
-      - CB_SERVER_NAME=CloudBeaver
-      - CB_ADMIN_NAME=admin
-      - CB_ADMIN_PASSWORD=admin
 
   rest:
     container_name: "rest"

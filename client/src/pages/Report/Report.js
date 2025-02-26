@@ -44,9 +44,8 @@ const Report = () => {
         const grade = service?.grade ?? 0;
 
         if (serviceStatus === "Processing") {
-            return <Spinner />
-        }
-        else {
+            return <Spinner />;
+        } else {
             let style = {
                 width: "30px",
                 height: "30px",
@@ -63,35 +62,33 @@ const Report = () => {
                 case "Pass":
                     return <div style={style}>{grade}%</div>;
                 case "Fail":
-                    return <img src={Fail} style={{"width": "20px", "height": "20px"}} alt="Service failed" />;
+                    return <img src={Fail} style={{ width: "20px", height: "20px" }} alt="Service failed" />;
                 case "Service error":
-                    return <img src={Error} style={{"width": "30px", "height": "30px"}} alt="Service error" />;
+                    return <img src={Error} style={{ width: "30px", height: "30px" }} alt="Service error" />;
                 case "None":
                     return ""; // Nothing to render
                 default:
                     return "";
             }
         }
-
-        return "";
-    }
+    };
 
     const selectService = (serviceId) => {
-        const service = serviceResults.filter(service => service.service_type === id)[0];
-        
+        const service = serviceResults.filter(service => service.service_type === serviceId)[0];
+
         if (service?.service_status !== "Processing") {
             const data = {
                 thesis_id: id,
                 report_type: serviceId
-            }
+            };
 
             axios.post(process.env.REACT_APP_BACKEND_HOST + "/get-report", data, {
                 headers: {
                     "Content-Type": "application/json"
                 }
             }).then(response => {
-                if (typeof(response.data.text) !== "string") {
-                    switch(serviceId) {
+                if (typeof (response.data.text) !== "string") {
+                    switch (serviceId) {
                         case "page_count":
                             setReportContent(<PageCount content={response.data.text} />);
                             break;
@@ -104,24 +101,23 @@ const Report = () => {
                         default:
                             break;
                     }
-                }
-                else {
+                } else {
                     setReportContent(response.data.text);
                 }
             }).catch(error => {
                 console.log(error);
             });
         }
-    }
+    };
 
     const reSubmit = () => {
-        navigate("/", {state: {resubmit: true}});
-    }
+        navigate("/", { state: { resubmit: true } });
+    };
 
     const downloadFile = () => {
         const data = {
             thesis_id: id
-        }
+        };
 
         axios.post(process.env.REACT_APP_BACKEND_HOST + "/download-file", data, {
             headers: {
@@ -140,13 +136,13 @@ const Report = () => {
         }).catch(error => {
             console.log(error);
         });
-    }
+    };
 
     const downloadReport = () => {
         const data = {
             thesis_id: id,
             report_type: "full"
-        }
+        };
 
         axios.post(process.env.REACT_APP_BACKEND_HOST + "/get-report", data, {
             headers: {
@@ -165,19 +161,18 @@ const Report = () => {
         }).catch(error => {
             console.log(error);
         });
-    }
+    };
 
     const submitFeedback = () => {
         if (!feedbackContent) {
             setWarning("Please enter your feedback.");
-        }
-        else {
+        } else {
             setWarning("");
 
             const data = {
                 thesis_id: id,
                 content: feedbackContent
-            }
+            };
 
             axios.post(process.env.REACT_APP_BACKEND_HOST + "/give-feedback", data, {
                 headers: {
@@ -189,12 +184,12 @@ const Report = () => {
                 console.log(error);
             });
         }
-    }
+    };
 
     useEffect(() => {
         const data = {
             thesis_id: id
-        }
+        };
 
         axios.post(process.env.REACT_APP_BACKEND_HOST + "/get-feedback", data, {
             headers: {
@@ -210,7 +205,7 @@ const Report = () => {
     useEffect(() => {
         const data = {
             thesis_id: id
-        }
+        };
 
         axios.post(process.env.REACT_APP_BACKEND_HOST + "/get-thesis-info", data, {
             headers: {
@@ -227,8 +222,8 @@ const Report = () => {
         if (thesis.student_id) {
             const data = {
                 student_id: thesis.student_id
-            }
-    
+            };
+
             axios.post(process.env.REACT_APP_BACKEND_HOST + "/get-all-submissions", data, {
                 headers: {
                     "Content-Type": "application/json"
@@ -236,7 +231,7 @@ const Report = () => {
             }).then(response => {
                 let submissions = response.data.reverse();
                 submissions = submissions.filter(submission => submission.id !== id);
-    
+
                 setPreviousReports(submissions);
             }).catch(error => {
                 console.log(error);
@@ -247,7 +242,7 @@ const Report = () => {
     useEffect(() => {
         const data = {
             thesis_id: id
-        }
+        };
 
         let interval;
 
@@ -258,7 +253,7 @@ const Report = () => {
                 }
             }).then(response => {
                 setServiceResults(response.data.services);
-                
+
                 if (response.data.finished) {
                     setReportReady(true);
                     if (reportContent === "Loading...") {
@@ -289,8 +284,7 @@ const Report = () => {
                 <div className="button" onClick={downloadFile}>
                     Download file
                 </div>
-                {
-                    reportReady && 
+                {reportReady &&
                     <div className="button" onClick={downloadReport}>
                         Download report
                     </div>
@@ -298,12 +292,15 @@ const Report = () => {
                 <a className="button" href="/guidelines">
                     Guidelines
                 </a>
-                {
-                    user.user_type === "Student" && (new Date(deadline) > new Date()) &&
+                {user.user_type === "Student" && (new Date(deadline) > new Date()) &&
                     <div className="button" onClick={reSubmit}>
                         Resubmit
                     </div>
                 }
+                {/* Add the "View Thesis" button */}
+                <div className="button" onClick={() => navigate(`/view-thesis/${id}`)}>
+                    View Thesis
+                </div>
             </div>
             <div className="main-section">
                 <div className="service-sections">
@@ -312,22 +309,20 @@ const Report = () => {
                             Template-based
                         </div>
                         <div className="services">
-                            {
-                                services.filter(service => service.type === "template-based")
-                                        .map(service => (
-                                        <div 
-                                            className="service"
-                                            key={service.id}
-                                            onClick={() => selectService(service.id)}>
-                                            <div className="name">
-                                                {service.name}
-                                            </div>
-                                            <div className="status">
-                                                {getServiceStatus(service.id)}
-                                            </div>
+                            {services.filter(service => service.type === "template-based")
+                                .map(service => (
+                                    <div
+                                        className="service"
+                                        key={service.id}
+                                        onClick={() => selectService(service.id)}>
+                                        <div className="name">
+                                            {service.name}
                                         </div>
-                                ))
-                            }
+                                        <div className="status">
+                                            {getServiceStatus(service.id)}
+                                        </div>
+                                    </div>
+                                ))}
                         </div>
                     </div>
                     <div className="service-section">
@@ -335,22 +330,20 @@ const Report = () => {
                             Analytical
                         </div>
                         <div className="services">
-                            {
-                                services.filter(service => service.type === "analytical")
-                                        .map(service => (
-                                        <div 
-                                            className="service"
-                                            key={service.id}
-                                            onClick={() => selectService(service.id)}>
-                                            <div className="name">
-                                                {service.name}
-                                            </div>
-                                            <div className="status">
-                                                {getServiceStatus(service.id)}
-                                            </div>
+                            {services.filter(service => service.type === "analytical")
+                                .map(service => (
+                                    <div
+                                        className="service"
+                                        key={service.id}
+                                        onClick={() => selectService(service.id)}>
+                                        <div className="name">
+                                            {service.name}
                                         </div>
-                                ))
-                            }
+                                        <div className="status">
+                                            {getServiceStatus(service.id)}
+                                        </div>
+                                    </div>
+                                ))}
                         </div>
                     </div>
                 </div>
@@ -358,17 +351,15 @@ const Report = () => {
                     {reportContent}
                 </div>
             </div>
-            {
-                (feedback.length > 0 || user.user_type === "Instructor") &&
+            {(feedback.length > 0 || user.user_type === "Instructor") &&
                 <div className="feedback">
                     <div className="title">
                         Advisor feedback
                     </div>
-                    {
-                        user.user_type === "Instructor" &&
+                    {user.user_type === "Instructor" &&
                         <div className="feedback-form">
-                            <textarea 
-                                className="form-input" 
+                            <textarea
+                                className="form-input"
                                 value={feedbackContent}
                                 onChange={(e) => setFeedbackContent(e.target.value)}
                                 placeholder="Enter your feedback">
@@ -382,23 +373,20 @@ const Report = () => {
                         </div>
                     }
                     <div className="comments">
-                        {
-                            feedback.map(comment => (
-                                <div className="comment" key={comment.id}>
-                                    <div className="content">
-                                        {comment.content}
-                                    </div>    
-                                    <div className="submitted-time">
-                                        {formatDate(comment.submitted_time)}
-                                    </div>
+                        {feedback.map(comment => (
+                            <div className="comment" key={comment.id}>
+                                <div className="content">
+                                    {comment.content}
                                 </div>
-                            ))
-                        }
+                                <div className="submitted-time">
+                                    {formatDate(comment.submitted_time)}
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             }
-            {
-                previousReports.length > 0 &&
+            {previousReports.length > 0 &&
                 <div className="previous-reports">
                     <div className="title">
                         Previous submissions
@@ -419,6 +407,6 @@ const Report = () => {
             }
         </div>
     );
-}
+};
 
 export default Report;

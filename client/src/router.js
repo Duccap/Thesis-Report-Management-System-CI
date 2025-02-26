@@ -6,7 +6,7 @@ import Logout from "./pages/Logout/Logout";
 import { createBrowserRouter } from "react-router-dom";
 import Guidelines from "./pages/Guidelines/Guidelines";
 import PrivateRoute from "./components/PrivateRoute/PrivateRoute";
-
+import ViewThesis from "./pages/ViewThesis/ViewThesis"; 
 const router = createBrowserRouter([
     {
         path: "/",
@@ -27,6 +27,10 @@ const router = createBrowserRouter([
     {
         path: "/logout",
         element: <Logout /> 
+    },
+    {
+        path: "/view-thesis/:id", 
+        element: <PrivateRoute children={<ViewThesis />} />
     }
 ]);
 
