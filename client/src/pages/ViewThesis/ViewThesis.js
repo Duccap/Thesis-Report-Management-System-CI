@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import Spinner from "../../components/Spinner/Spinner";
-import { path } from "d3";
 
 let adobeScriptLoaded = false;
 
@@ -42,9 +41,26 @@ const ViewThesis = () => {
 
         const initializeAdobeView = () => {
             try {
+                const fullName = localStorage.getItem("full_name");
+                const profile = {
+                    userProfile: {
+                        name: fullName,
+                        firstName: fullName.split(" ")[0],
+                        lastName: fullName.split(" ")[1],
+                    }
+                    };
+                const previewConfig = {
+                    embedMode: "FULL_WINDOW",
+                    showDownloadPDF: true,
+                    showPrintPDF: true,
+                    showZoomControl: true,
+                    defaultViewMode: "FIT_WIDTH",
+                    
+                };
                 const adobeDCView = new AdobeDC.View({
                     clientId: process.env.REACT_APP_ADOBE_API,
                     divId: "adobe-dc-view",
+                    sendAutoPDFAnalytics: false
                 });
 
                 adobeDCView.previewFile(
@@ -52,12 +68,20 @@ const ViewThesis = () => {
                         content: { location: { url: pdfUrl } },
                         metaData: { fileName: `Thesis ${id}` },
                     },
-                    {
-                        embedMode: "FULL_WINDOW",
-                        showDownloadPDF: true,
-                        showPrintPDF: true,
-                        showZoomControl: true,
-                    }
+                    previewConfig
+                );
+
+                adobeDCView.registerCallback(
+                    AdobeDC.View.Enum.CallbackType.GET_USER_PROFILE_API,
+                    function() {
+                        return new Promise((resolve, reject) => {
+                            resolve({
+                                code: AdobeDC.View.Enum.ApiResponseCode.SUCCESS,
+                                data: profile
+                            });
+                        });
+                    },
+                    {}
                 );
             } catch (error) {
                 console.error("Error initializing Adobe PDF Embed API:", error);

@@ -13,6 +13,10 @@ const router = createBrowserRouter([
         element: <PrivateRoute children={<Homepage />} />
     },
     {
+        path: "/view-thesis/:id", 
+        element: <PrivateRoute children={<ViewThesis />} />
+    },
+    {
         path: "/report/:id",
         element: <PrivateRoute children={<Report />} />
     },

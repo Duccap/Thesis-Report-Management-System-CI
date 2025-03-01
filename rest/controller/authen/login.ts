@@ -18,9 +18,10 @@ const login = async (req: Request, res: Response) => {
     }
     else {
         if (data.password === user.dataValues.password) {
-            returnData.message = "Logged in successfuly.";
+            returnData.message = "Logged in successfully.";
             const userType: Model | null = await UserType.findOne({where: {id: user.dataValues.type_id}});
             returnData.user_type = userType?.dataValues.type_name;
+            returnData.full_name = user.dataValues.full_name; 
             res.status(200).send(returnData);
         }
         else {

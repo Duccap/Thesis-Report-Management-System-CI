@@ -30,15 +30,13 @@ const Login = () => {
                 password: password
             }
 
-            console.log(process.env.REACT_APP_BACKEND_HOST + "/login");
-
             axios.post(process.env.REACT_APP_BACKEND_HOST + "/login", data, {
                 headers: {
                     "Content-Type": "application/json"
                 }
             }).then(response => {
                 if (response.status === 200) {
-                    login(userId.toUpperCase(), response.data.user_type);
+                    login(userId.toUpperCase(), response.data.user_type, response.data.full_name); 
                     navigate("/");
                 }
             }).catch(error => {

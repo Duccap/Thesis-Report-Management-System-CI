@@ -26,11 +26,13 @@ const NavBar = () => {
                     {user.user_id}
                 </div>
             </div>
-            <div className={"dropdown " + (activeDropdown ? "active" : "")}>
-                <a className="option" href="/logout">
-                    Logout
-                </a>
-            </div>
+            {activeDropdown && ( 
+                <div className="dropdown active">
+                    <a className="option" href="/logout">
+                        Logout
+                    </a>
+                </div>
+            )}
         </div>
     )
 }
