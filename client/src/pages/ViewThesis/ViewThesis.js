@@ -47,20 +47,22 @@ const ViewThesis = () => {
                         name: fullName,
                         firstName: fullName.split(" ")[0],
                         lastName: fullName.split(" ")[1],
-                    }
-                    };
+                    },
+                };
+
                 const previewConfig = {
                     embedMode: "FULL_WINDOW",
                     showDownloadPDF: true,
                     showPrintPDF: true,
                     showZoomControl: true,
                     defaultViewMode: "FIT_WIDTH",
-                    
+                    showDisabledSaveButton: true,
                 };
+
                 const adobeDCView = new AdobeDC.View({
                     clientId: process.env.REACT_APP_ADOBE_API,
                     divId: "adobe-dc-view",
-                    sendAutoPDFAnalytics: false
+                    sendAutoPDFAnalytics: false,
                 });
 
                 adobeDCView.previewFile(
@@ -71,14 +73,52 @@ const ViewThesis = () => {
                     previewConfig
                 );
 
+                // save call back
+                adobeDCView.registerCallback(
+                    AdobeDC.View.Enum.CallbackType.SAVE_API,
+                    async (metaData, content, options) => {
+                        try {
+                            var uint8Array = new Uint8Array(content);
+                            var blob = new Blob([uint8Array], { type: 'application/pdf' });
+                
+                            
+                            const formData = new FormData();
+                            formData.append("thesis_id", id);
+                            formData.append("pdf", blob, `thesis_${id}.pdf`);
+                
+                            await axios.post(
+                                `${process.env.REACT_APP_BACKEND_HOST}/update-thesis`,
+                                formData,
+                                {
+                                    headers: {
+                                        "Content-Type": "multipart/form-data",
+                                    },
+                                }
+                            );
+                
+                            return Promise.resolve({
+                                code: AdobeDC.View.Enum.ApiResponseCode.SUCCESS,
+                                data: { metaData: metaData },
+                            });
+                        } catch (error) {
+                            console.error("Error saving PDF:", error);
+                            return Promise.reject({
+                                code: AdobeDC.View.Enum.ApiResponseCode.FAIL,
+                            });
+                        }
+                    },
+                    {
+                        autoSaveFrequency: 5,
+                        enableFocusPolling: true,
+                    }
+                );
+                // Register user profile callback
                 adobeDCView.registerCallback(
                     AdobeDC.View.Enum.CallbackType.GET_USER_PROFILE_API,
-                    function() {
-                        return new Promise((resolve, reject) => {
-                            resolve({
-                                code: AdobeDC.View.Enum.ApiResponseCode.SUCCESS,
-                                data: profile
-                            });
+                    function () {
+                        return Promise.resolve({
+                            code: AdobeDC.View.Enum.ApiResponseCode.SUCCESS,
+                            data: profile,
                         });
                     },
                     {}

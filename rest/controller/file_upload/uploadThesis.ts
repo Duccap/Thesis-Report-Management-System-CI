@@ -28,7 +28,7 @@ const uploadThesis = async (req: Request, res: Response) => {
         const bucketName: string = process.env.GOOGLE_CLOUD_STORAGE_BUCKET!;
         const bucket: Bucket = storage.bucket(bucketName);
     
-        const destination: string = `${process.env.APP_NAME!}/${submission.id}.pdf`;
+        const destination: string = `${process.env.APP_NAME!}/${submission.id}/${submission.id}.pdf`;
         const options: {[keys: string]: any} = {
             metadata: {
                 contentType: "application/pdf"

@@ -18,7 +18,7 @@ const downloadFile = async (req: Request, res: Response) => {
     else {
         const fileName: string = thesis.dataValues.file_name;
 
-        const filePath: string = `${process.env.APP_NAME}/${fileName}.pdf`;
+        const filePath: string = `${process.env.APP_NAME}/${fileName}/${fileName}.pdf`;
 
         const storage = new Storage();
         const bucketName: string = process.env.GOOGLE_CLOUD_STORAGE_BUCKET!;
