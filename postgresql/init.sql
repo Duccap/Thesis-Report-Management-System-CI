@@ -167,7 +167,8 @@ CREATE TABLE public.thesis (
     thesis_name character varying(255) NOT NULL,
     file_location character varying(255) NOT NULL,
     file_name character varying(255) NOT NULL,
-    submitted_time timestamp with time zone NOT NULL
+    submitted_time timestamp with time zone NOT NULL,
+    last_modified timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP 
 );
 CREATE TABLE public.event (
     id uuid NOT NULL PRIMARY KEY,

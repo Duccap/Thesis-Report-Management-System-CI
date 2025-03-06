@@ -50,6 +50,7 @@ const uploadThesis = async (req: Request, res: Response) => {
     
             submission.file_location = destination;
             submission.submitted_time = (new Date()).toString();
+            submission.last_modified = submission.submitted_time;
     
             const instance = Thesis.create(submission as any).then(async thesisResponse => {
                 const producer: Producer = new Producer();

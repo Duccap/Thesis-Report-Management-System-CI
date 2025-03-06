@@ -22,8 +22,12 @@ import getAllNotifications from "./controller/user/admin/getAllNotifications";
 import getSubmissionStatus from "./controller/analysis/getSubmissionStatus";
 import getNewNotification from "./controller/user/getNewNotification";
 import getInstructor from "./controller/user/student/getInstructor";
+
+// later divide into separate files
 import multer from "multer";
 const upload = multer();
+import Thesis from "./database/Thesis";
+
 
 const storage = new Storage({
     keyFilename: "/run/secrets/gcp-credentials",
@@ -57,22 +61,31 @@ const Router = (app: Express) => {
 
     app.get("/get-pdf", async (req, res) => {
         const { thesis_id } = req.query;
-
+    
         if (!thesis_id) {
             return res.status(400).json({ error: "Thesis ID is required" });
         }
-
+    
         try {
-            const fileName = `rest/${thesis_id}/${thesis_id}.pdf`; // Updated path
+            const fileName = `rest/${thesis_id}/${thesis_id}.pdf`;
             const file = storage.bucket(bucketName).file(fileName);
-
+    
+            const thesis = await Thesis.findOne({ where: { id: thesis_id } });
+            if (!thesis) {
+                return res.status(404).json({ error: "Thesis not found" });
+            }
+    
+            const lastModifiedInDB = thesis.getDataValue("last_modified");
+    
             res.setHeader("Content-Type", "application/pdf");
+            res.setHeader("Last-Modified", lastModifiedInDB.toISOString());
             file.createReadStream().pipe(res);
         } catch (error) {
             console.error("Error fetching PDF:", error);
             res.status(500).json({ error: "Failed to fetch PDF" });
         }
     });
+
     app.post("/update-thesis", upload.single("pdf"), async (req, res) => {
         const { thesis_id } = req.body;
     
@@ -85,24 +98,62 @@ const Router = (app: Express) => {
             const bucketName = process.env.GOOGLE_CLOUD_STORAGE_BUCKET!;
             const bucket = storage.bucket(bucketName);
     
-            // Overwrite the PDF file in GCS
             const pdfFileName = `rest/${thesis_id}/${thesis_id}.pdf`;
             const pdfFile = bucket.file(pdfFileName);
     
-            // Save the file with the correct metadata
             await pdfFile.save(req.file.buffer, {
                 metadata: {
-                    contentType: "application/pdf", // Ensure correct Content-Type
+                    contentType: "application/pdf",
                 },
             });
     
-            res.status(200).json({ message: "Thesis updated successfully" });
+           
+            const last_modified = new Date();
+    
+           
+            await Thesis.update(
+                { last_modified: last_modified },
+                { where: { id: thesis_id } }
+            );
+    
+            res.status(200).json({ 
+                message: "Thesis updated successfully", 
+                last_modified: last_modified.toISOString() 
+            });
         } catch (error) {
             console.error("Error updating thesis:", error);
             res.status(500).json({ error: "Failed to update thesis" });
         }
     });
 
+    app.get("/check-file-modified", async (req, res) => {
+        const { thesis_id, last_modified } = req.query;
+    
+        if (!thesis_id || !last_modified) {
+            return res.status(400).json({ error: "Thesis ID and last_modified are required" });
+        }
+    
+        try {
+            const thesis = await Thesis.findOne({ where: { id: thesis_id } });
+            if (!thesis) {
+                return res.status(404).json({ error: "Thesis not found" });
+            }
+    
+            const lastModifiedInDB = thesis.getDataValue("last_modified");
+    
+            const frontendLastModified = new Date(last_modified as string);
+    
+            if (lastModifiedInDB.getTime() > frontendLastModified.getTime()) {
+                return res.status(200).json({ modified: true });
+            }
+    
+            return res.status(200).json({ modified: false });
+        } catch (error) {
+            console.error("Error checking file modification:", error);
+            res.status(500).json({ error: "Failed to check file modification" });
+        }
+    });
 };
 
 export default Router;
+

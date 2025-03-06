@@ -22,9 +22,13 @@ const ViewThesis = () => {
                         responseType: "blob",
                     }
                 );
-
+    
                 const url = URL.createObjectURL(new Blob([response.data]));
                 setPdfUrl(url);
+    
+                // Store the lastModifiedInDB timestamp from the response headers
+                const lastModifiedInDB = response.headers["last-modified"];
+                localStorage.setItem(`lastModifiedInDB_${id}`, lastModifiedInDB);
             } catch (error) {
                 console.error("Error fetching PDF:", error);
                 setError("Failed to fetch the PDF. Please try again later.");
@@ -32,13 +36,13 @@ const ViewThesis = () => {
                 setIsLoading(false);
             }
         };
-
+    
         fetchPdf();
     }, [id]);
-
+    
     useEffect(() => {
         if (!pdfUrl) return;
-
+    
         const initializeAdobeView = () => {
             try {
                 const fullName = localStorage.getItem("full_name");
@@ -49,7 +53,7 @@ const ViewThesis = () => {
                         lastName: fullName.split(" ")[1],
                     },
                 };
-
+    
                 const previewConfig = {
                     embedMode: "FULL_WINDOW",
                     showDownloadPDF: true,
@@ -58,13 +62,13 @@ const ViewThesis = () => {
                     defaultViewMode: "FIT_WIDTH",
                     showDisabledSaveButton: true,
                 };
-
+    
                 const adobeDCView = new AdobeDC.View({
                     clientId: process.env.REACT_APP_ADOBE_API,
                     divId: "adobe-dc-view",
                     sendAutoPDFAnalytics: false,
                 });
-
+    
                 adobeDCView.previewFile(
                     {
                         content: { location: { url: pdfUrl } },
@@ -72,21 +76,47 @@ const ViewThesis = () => {
                     },
                     previewConfig
                 );
-
-                // save call back
+    
+                // Save callback
                 adobeDCView.registerCallback(
                     AdobeDC.View.Enum.CallbackType.SAVE_API,
                     async (metaData, content, options) => {
                         try {
-                            var uint8Array = new Uint8Array(content);
-                            var blob = new Blob([uint8Array], { type: 'application/pdf' });
+                            // Get the stored lastModifiedInDB from localStorage
+                            const lastModifiedInDB = localStorage.getItem(`lastModifiedInDB_${id}`);
                 
-                            
+                            // Check if the file has been modified by another user
+                            const checkResponse = await axios.get(
+                                `${process.env.REACT_APP_BACKEND_HOST}/check-file-modified`,
+                                {
+                                    params: { thesis_id: id, last_modified: lastModifiedInDB },
+                                }
+                            );
+                
+                            if (checkResponse.data.modified) {
+                                // File has been modified by another user
+                                return Promise.resolve({
+                                    code: AdobeDC.View.Enum.ApiResponseCode.FILE_MODIFIED,
+                                    data: {
+                                        // modifiedBy: {
+                                        //     name: "Another User", // Replace with actual user name
+                                        //     mail: "anotheruser@example.com", // Replace with actual user email
+                                        // },
+                                    },
+                                });
+                            }
+                
+                            // Convert the modified content to a Blob
+                            const uint8Array = new Uint8Array(content);
+                            const blob = new Blob([uint8Array], { type: 'application/pdf' });
+                
+                            // Prepare the form data for the update request
                             const formData = new FormData();
                             formData.append("thesis_id", id);
                             formData.append("pdf", blob, `thesis_${id}.pdf`);
                 
-                            await axios.post(
+                            // Send the updated PDF to the backend
+                            const updateResponse = await axios.post(
                                 `${process.env.REACT_APP_BACKEND_HOST}/update-thesis`,
                                 formData,
                                 {
@@ -95,6 +125,9 @@ const ViewThesis = () => {
                                     },
                                 }
                             );
+                
+                            // Update the lastModifiedInDB value in localStorage
+                            localStorage.setItem(`lastModifiedInDB_${id}`, updateResponse.data.last_modified);
                 
                             return Promise.resolve({
                                 code: AdobeDC.View.Enum.ApiResponseCode.SUCCESS,
@@ -112,6 +145,7 @@ const ViewThesis = () => {
                         enableFocusPolling: true,
                     }
                 );
+                
                 // Register user profile callback
                 adobeDCView.registerCallback(
                     AdobeDC.View.Enum.CallbackType.GET_USER_PROFILE_API,
@@ -128,23 +162,23 @@ const ViewThesis = () => {
                 setError("Failed to load the PDF viewer. Please try again later.");
             }
         };
-
+    
         if (!adobeScriptLoaded) {
             const script = document.createElement("script");
             script.src = "https://acrobatservices.adobe.com/view-sdk/viewer.js";
             script.async = true;
             document.body.appendChild(script);
-
+    
             script.onload = () => {
                 adobeScriptLoaded = true;
                 document.addEventListener("adobe_dc_view_sdk.ready", initializeAdobeView);
             };
-
+    
             script.onerror = () => {
                 console.error("Failed to load Adobe PDF Embed API script.");
                 setError("Failed to load the PDF viewer. Please try again later.");
             };
-
+    
             return () => {
                 document.body.removeChild(script);
                 document.removeEventListener("adobe_dc_view_sdk.ready", initializeAdobeView);

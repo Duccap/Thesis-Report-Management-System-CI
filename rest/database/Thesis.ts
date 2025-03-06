@@ -41,6 +41,11 @@ const Thesis = db.sequelize.define("Thesis", {
         type: DataTypes.DATE,
         allowNull: false
     },
+    last_modified: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW 
+    },
     // output_locations: {
     //     type: DataTypes.ARRAY(DataTypes.STRING),
     //     defaultValue: [],
