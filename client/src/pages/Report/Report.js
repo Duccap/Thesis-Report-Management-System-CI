@@ -185,12 +185,12 @@ const Report = () => {
             });
         }
     };
-
+    // remove [feedback] from the dependency array, only run once
     useEffect(() => {
         const data = {
             thesis_id: id
         };
-
+    
         axios.post(process.env.REACT_APP_BACKEND_HOST + "/get-feedback", data, {
             headers: {
                 "Content-Type": "application/json"
@@ -200,7 +200,7 @@ const Report = () => {
         }).catch(error => {
             console.log(error);
         });
-    }, [feedback]);
+    }, []);
 
     useEffect(() => {
         const data = {
@@ -264,7 +264,7 @@ const Report = () => {
             }).catch(error => {
                 console.log(error);
             });
-        }, 1000);
+        }, 10000);
     }, []);
 
     return (

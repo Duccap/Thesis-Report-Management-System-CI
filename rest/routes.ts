@@ -57,7 +57,7 @@ const Router = (app: Express) => {
     app.post("/send-notification", sendNotification);
     app.post("/view-notification", viewNotification);
     app.post("/get-new-notifications", getNewNotification);
-    app.get("/get-submission-status", getSubmissionStatus);
+    app.get("/get-submission-status", getSubmissionStatus); // ? unused
 
     app.get("/get-pdf", async (req, res) => {
         const { thesis_id } = req.query;

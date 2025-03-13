@@ -24,6 +24,10 @@ const Event = db.sequelize.define("Event", {
         type: DataTypes.STRING,
         allowNull: true
     },
+    output_annotation_location: {
+        type: DataTypes.STRING(255),
+        allowNull: true
+    },
     service_status: {
         type: DataTypes.STRING,
         allowNull: false

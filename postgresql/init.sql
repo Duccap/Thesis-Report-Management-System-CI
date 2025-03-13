@@ -63,6 +63,7 @@ CREATE TABLE public.output (
     thesis_id character varying(255) NOT NULL,
     file_name character varying(255) NOT NULL,
     file_location character varying(255) NOT NULL,
+    annotation_file_location character varying(255),
     result character varying(55),
     grade character varying(55),
     uploaded_time timestamp with time zone NOT NULL
@@ -175,6 +176,7 @@ CREATE TABLE public.event (
     thesis_id uuid NOT NULL REFERENCES public.thesis(id) ON DELETE CASCADE ON UPDATE CASCADE,
     service_type character varying(55) NOT NULL,
     output_location character varying(255),
+    output_annotation_location character varying(255),
     service_status character varying(55),
     result character varying(55),
     grade character varying(55)

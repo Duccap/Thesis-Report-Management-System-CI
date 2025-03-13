@@ -61,4 +61,20 @@ class Producer:
         channel.basic_publish(exchange=self.output_location_exchange, routing_key=self.output_location_queue, body=json.dumps(message))
 
         print("\nFile uploaded to bucket for " + event_id + ", result = " + result, flush=True)
+    # Add the publish_annotation method
+    def publish_annotation(self, event_id, thesis_id, service_type, annotation_file_location):
+        channel = self.connection.channel()
+
+        message = {
+            "id": event_id,
+            "thesis_id": thesis_id,
+            "service_type": service_type,
+            "annotation_file_location": annotation_file_location,
+            "service_status": "Annotation Ready"
+        }
+
+        channel.queue_declare(queue=self.output_location_queue, durable=True)
+        channel.basic_publish(exchange=self.output_location_exchange, routing_key=self.output_location_queue, body=json.dumps(message))
+
+        print("\nAnnotation ready for event " + str(event_id) + " in " + service_type, flush=True)
         

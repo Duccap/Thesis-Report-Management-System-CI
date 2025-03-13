@@ -61,6 +61,8 @@ const ViewThesis = () => {
                     showZoomControl: true,
                     defaultViewMode: "FIT_WIDTH",
                     showDisabledSaveButton: true,
+                    // enableAnnotationAPIs: true,
+                    // includePDFAnnotations: true,
                 };
     
                 const adobeDCView = new AdobeDC.View({
