@@ -40,14 +40,15 @@ def generate_annotation(thesis_id, major, pdf_file_path):
         if matches:
             rect = matches[0]  # Use the first found occurrence
             x0, y0, x1, y1 = convert_coordinates(first_page, rect)  # Convert to Adobe's coordinate system
-
+            annotaion_id = str(uuid.uuid4())
             annotation = {
                 "@context": [
                     "https://www.w3.org/ns/anno.jsonld",
                     "https://comments.acrobat.com/ns/anno.jsonld"
                 ],
+                "source": "service",
                 "type": "Annotation",
-                "id": thesis_id,
+                "id": annotaion_id,
                 "bodyValue": f"Detected Major: {major}",
                 "motivation": "commenting",
                 "target": {
@@ -69,7 +70,7 @@ def generate_annotation(thesis_id, major, pdf_file_path):
                 },
                 "creator": {
                     "type": "Person",
-                    "name": os.environ.get("APP_NAME", "Thesis Analyzer")
+                    "name": os.environ.get("APP_NAME")
                 },
                 "created": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "modified": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")

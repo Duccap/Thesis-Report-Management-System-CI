@@ -61,8 +61,8 @@ const ViewThesis = () => {
                     showZoomControl: true,
                     defaultViewMode: "FIT_WIDTH",
                     showDisabledSaveButton: true,
-                    // enableAnnotationAPIs: true,
-                    // includePDFAnnotations: true,
+                    enableAnnotationAPIs: true,
+                    includePDFAnnotations: true,
                 };
     
                 const adobeDCView = new AdobeDC.View({
@@ -71,13 +71,38 @@ const ViewThesis = () => {
                     sendAutoPDFAnalytics: false,
                 });
     
-                adobeDCView.previewFile(
+                var previewFilePromise = adobeDCView.previewFile(
                     {
                         content: { location: { url: pdfUrl } },
-                        metaData: { fileName: `Thesis ${id}` },
+                        metaData: { fileName: `Thesis ${id}`, id: id },
                     },
                     previewConfig
                 );
+                
+                // Fetch all annotations from the backend
+                const fetchAnnotations = async () => {
+                    try {
+                        const response = await axios.get(
+                            `${process.env.REACT_APP_BACKEND_HOST}/get-annotations`,
+                            { params: { thesis_id: id } }
+                        );
+
+                        if (response.data && response.data.length > 0) {
+                            previewFilePromise.then(adobeViewer => {
+                                adobeViewer.getAnnotationManager().then(annotationManager => {
+                                    annotationManager.addAnnotations(response.data)
+                                        .then(() => console.log("Annotations added successfully"))
+                                        .catch(error => console.error("Error adding annotations:", error));
+                                });
+                            });
+                        }
+                    } catch (error) {
+                        console.error("Error fetching annotations:", error);
+                    }
+                };
+
+                fetchAnnotations();
+
     
                 // Save callback
                 adobeDCView.registerCallback(
@@ -108,22 +133,30 @@ const ViewThesis = () => {
                                 });
                             }
                 
-                            // Convert the modified content to a Blob
-                            const uint8Array = new Uint8Array(content);
-                            const blob = new Blob([uint8Array], { type: 'application/pdf' });
+                            // Fetch all annotations from the PDF
+                            const adobeViewer = await previewFilePromise;
+                            const annotationManager = await adobeViewer.getAnnotationManager();
+                            const existingAnnotations = await annotationManager.getAnnotations();
                 
-                            // Prepare the form data for the update request
-                            const formData = new FormData();
-                            formData.append("thesis_id", id);
-                            formData.append("pdf", blob, `thesis_${id}.pdf`);
+                            // Get the list of service names from .env
+                            const serviceNames = process.env.REACT_APP_SERVICE_LIST.split(",");
                 
-                            // Send the updated PDF to the backend
+                            // Filter out service annotations
+                            const userAnnotations = existingAnnotations.filter(ann => {
+                                const creatorName = ann.creator?.name;
+                                return !serviceNames.includes(creatorName);
+                            });
+                
+                            // Send only the user annotations to the backend
                             const updateResponse = await axios.post(
                                 `${process.env.REACT_APP_BACKEND_HOST}/update-thesis`,
-                                formData,
+                                {
+                                    thesis_id: id,
+                                    user_annotations: userAnnotations,
+                                },
                                 {
                                     headers: {
-                                        "Content-Type": "multipart/form-data",
+                                        "Content-Type": "application/json",
                                     },
                                 }
                             );

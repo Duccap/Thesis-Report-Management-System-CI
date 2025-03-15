@@ -27,6 +27,7 @@ import getInstructor from "./controller/user/student/getInstructor";
 import multer from "multer";
 const upload = multer();
 import Thesis from "./database/Thesis";
+import Event from "./database/Event";
 
 
 const storage = new Storage({
@@ -86,11 +87,11 @@ const Router = (app: Express) => {
         }
     });
 
-    app.post("/update-thesis", upload.single("pdf"), async (req, res) => {
-        const { thesis_id } = req.body;
+    app.post("/update-thesis", async (req, res) => {
+        const { thesis_id, user_annotations } = req.body;
     
-        if (!thesis_id || !req.file) {
-            return res.status(400).json({ error: "Thesis ID and PDF file are required" });
+        if (!thesis_id || !user_annotations) {
+            return res.status(400).json({ error: "Thesis ID and user annotations are required" });
         }
     
         try {
@@ -98,31 +99,29 @@ const Router = (app: Express) => {
             const bucketName = process.env.GOOGLE_CLOUD_STORAGE_BUCKET!;
             const bucket = storage.bucket(bucketName);
     
-            const pdfFileName = `rest/${thesis_id}/${thesis_id}.pdf`;
-            const pdfFile = bucket.file(pdfFileName);
-    
-            await pdfFile.save(req.file.buffer, {
+            // Save user annotations as a JSON file
+            const userAnnotationsFileName = `rest/${thesis_id}/user_annotations.json`;
+            const userAnnotationsFile = bucket.file(userAnnotationsFileName);
+            await userAnnotationsFile.save(JSON.stringify(user_annotations), {
                 metadata: {
-                    contentType: "application/pdf",
+                    contentType: "application/json",
                 },
             });
     
-           
+            // Update the last_modified timestamp
             const last_modified = new Date();
-    
-           
             await Thesis.update(
                 { last_modified: last_modified },
                 { where: { id: thesis_id } }
             );
     
             res.status(200).json({ 
-                message: "Thesis updated successfully", 
+                message: "Thesis annotations updated successfully", 
                 last_modified: last_modified.toISOString() 
             });
         } catch (error) {
-            console.error("Error updating thesis:", error);
-            res.status(500).json({ error: "Failed to update thesis" });
+            console.error("Error updating thesis annotations:", error);
+            res.status(500).json({ error: "Failed to update thesis annotations" });
         }
     });
 
@@ -151,6 +150,67 @@ const Router = (app: Express) => {
         } catch (error) {
             console.error("Error checking file modification:", error);
             res.status(500).json({ error: "Failed to check file modification" });
+        }
+    });
+
+    app.get("/get-annotations", async (req, res) => {
+        const { thesis_id } = req.query;
+    
+        if (!thesis_id) {
+            return res.status(400).json({ error: "Thesis ID is required" });
+        }
+    
+        try {
+            // Array to store all annotations
+            const allAnnotations: any[] = [];
+    
+            // Fetch user annotations from user_annotations.json
+            const userAnnotationsFileName = `rest/${thesis_id}/user_annotations.json`;
+            const userAnnotationsFile = storage.bucket(bucketName).file(userAnnotationsFileName);
+    
+            // Check if the user annotations file exists
+            const [userAnnotationsExists] = await userAnnotationsFile.exists();
+            if (userAnnotationsExists) {
+                const [userAnnotationsData] = await userAnnotationsFile.download();
+                const userAnnotations = JSON.parse(userAnnotationsData.toString());
+    
+                // Ensure user annotations is always an array
+                if (!Array.isArray(userAnnotations)) {
+                    allAnnotations.push(userAnnotations); // Single annotation object
+                } else {
+                    allAnnotations.push(...userAnnotations); // Array of annotations
+                }
+            }
+    
+            // Fetch service annotations from events
+            const events = await Event.findAll({ where: { thesis_id } });
+            if (events && events.length > 0) {
+                for (const event of events) {
+                    const annotationLocation = event.getDataValue("output_annotation_location");
+                    if (annotationLocation) {
+                        const annotationFile = storage.bucket(bucketName).file(annotationLocation);
+                        const [annotationData] = await annotationFile.download();
+                        const annotations = JSON.parse(annotationData.toString());
+    
+                        if (!Array.isArray(annotations)) {
+                            allAnnotations.push(annotations); 
+                        } else {
+                            allAnnotations.push(...annotations); 
+                        }
+                    }
+                }
+            }
+    
+            if (allAnnotations.length === 0) {
+                return res.status(404).json({ error: "No annotations found" });
+            }
+    
+    
+            // Send all annotations to frontend
+            res.status(200).json(allAnnotations);
+        } catch (error) {
+            console.error("Error fetching annotations:", error);
+            res.status(500).json({ error: "Failed to fetch annotations" });
         }
     });
 };
