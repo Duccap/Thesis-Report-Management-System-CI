@@ -58,7 +58,7 @@ services:
         SERVICE_LIST: "major_classifier,word_frequency,chapter_title,format_check,chapter_summarization,page_count,table_of_content,citation,table_figure_detection,grammar"
         GUIDELINES_LIST: "chapter_title,format_check,page_count"
         GOOGLE_APPLICATION_CREDENTIALS: "/run/secrets/gcp-credentials"
-        GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188"
+        GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188_2"
   
   client:
     container_name: "client"
@@ -99,7 +99,7 @@ services:
       DATABASE_PASSWORD: "123456"
       DATABASE_HOST: "postgresql"
       DATABASE_PORT: "5432"
-      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188"
+      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188_2"
       GOOGLE_APPLICATION_CREDENTIALS: "/app/google_credentials.json"
       ROOT_DIR: "/app"
   
@@ -129,7 +129,7 @@ services:
       DATABASE_PASSWORD: "123456"
       DATABASE_HOST: "postgresql"
       DATABASE_PORT: "5432"
-      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188"
+      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188_2"
       GOOGLE_APPLICATION_CREDENTIALS: "/app/google_credentials.json"
       ROOT_DIR: "/app"
   
@@ -159,7 +159,7 @@ services:
       DATABASE_PASSWORD: "123456"
       DATABASE_HOST: "postgresql"
       DATABASE_PORT: "5432"
-      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188"
+      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188_2"
       GOOGLE_APPLICATION_CREDENTIALS: "/app/google_credentials.json"
       ROOT_DIR: "/app"
   
@@ -189,7 +189,7 @@ services:
       DATABASE_PASSWORD: "123456"
       DATABASE_HOST: "postgresql"
       DATABASE_PORT: "5432"
-      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188"
+      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188_2"
       GOOGLE_APPLICATION_CREDENTIALS: "/app/google_credentials.json"
       ROOT_DIR: "/app"
   
@@ -219,7 +219,7 @@ services:
       DATABASE_PASSWORD: "123456"
       DATABASE_HOST: "postgresql"
       DATABASE_PORT: "5432"
-      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188"
+      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188_2"
       GOOGLE_APPLICATION_CREDENTIALS: "/app/google_credentials.json"
       ROOT_DIR: "/app"
   
@@ -249,7 +249,7 @@ services:
       DATABASE_PASSWORD: "123456"
       DATABASE_HOST: "postgresql"
       DATABASE_PORT: "5432"
-      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188"
+      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188_2"
       GOOGLE_APPLICATION_CREDENTIALS: "/app/google_credentials.json"
       ROOT_DIR: "/app"
   
@@ -279,7 +279,7 @@ services:
       DATABASE_PASSWORD: "123456"
       DATABASE_HOST: "postgresql"
       DATABASE_PORT: "5432"
-      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188"
+      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188_2"
       GOOGLE_APPLICATION_CREDENTIALS: "/app/google_credentials.json"
       ROOT_DIR: "/app"
   
@@ -309,7 +309,7 @@ services:
       DATABASE_PASSWORD: "123456"
       DATABASE_HOST: "postgresql"
       DATABASE_PORT: "5432"
-      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188"
+      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188_2"
       GOOGLE_APPLICATION_CREDENTIALS: "/app/google_credentials.json"
       ROOT_DIR: "/app"
   
@@ -339,7 +339,7 @@ services:
       DATABASE_PASSWORD: "123456"
       DATABASE_HOST: "postgresql"
       DATABASE_PORT: "5432"
-      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188"
+      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188_2"
       GOOGLE_APPLICATION_CREDENTIALS: "/app/google_credentials.json"
       ROOT_DIR: "/app"
   
@@ -369,7 +369,7 @@ services:
       DATABASE_PASSWORD: "123456"
       DATABASE_HOST: "postgresql"
       DATABASE_PORT: "5432"
-      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188"
+      GOOGLE_CLOUD_STORAGE_BUCKET: "thesis_file_bucket_ititiu20188_2"
       GOOGLE_APPLICATION_CREDENTIALS: "/app/google_credentials.json"
       ROOT_DIR: "/app"
   

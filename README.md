@@ -96,7 +96,7 @@ Make sure the tools below are installed. The instructions are given based on dif
 ```sh
 git clone https://github.com/Nhathuy1305/Thesis-Report-Management-System-CI.git
 ```
-2. Create a Google Cloud Storage bucket named <a>thesis_file_bucket_ititiu20188</a>.
+2. Create a Google Cloud Storage bucket named <a>thesis_file_bucket_ititiu20188_2</a>.
 3. Upload the <a>requirements</a> folder to this bucket.
 4. Copy your Google Cloud credentials to <a>google_credentials.json</a>.
 5. Edit the submission deadline to your preferred date at line 193 of <a>/postgresql/init.sql</a>. It is recommended that this value should be after the current date on your system, otherwise, submission will be closed.
