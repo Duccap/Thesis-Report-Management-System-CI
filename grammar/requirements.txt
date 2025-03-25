@@ -4,3 +4,4 @@ pdfplumber
 language_tool_python
 python-dotenv
 google-cloud-storage
+pymupdf
