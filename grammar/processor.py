@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 def check_grammar(uploaded_file_location):
     try:
-        logger.info("Initializing LanguageTool with enhanced settings")
+        logger.info("Initializing LanguageTool with adjusted settings")
         tool = language_tool_python.LanguageTool('en-US', config={
             'cacheSize': 1000,
             'pipelineCaching': True
@@ -65,6 +65,12 @@ def check_grammar(uploaded_file_location):
         
         enhanced_matches = []
         for match in matches:
+            # Skip minor spelling errors to reduce typo sensitivity
+            if match.ruleId.startswith("MORFOLOGIK_RULE") and len(match.replacements) == 1:
+                if len(match.replacements[0]) <= len(match.context.strip()) + 4: #modify this threshold as needed
+                    logger.debug(f"Skipping minor typo: {match.context}")
+                    continue
+
             match_text = full_text[match.offset:match.offset+match.errorLength]
             matching_blocks = []
             current_pos = 0
@@ -99,7 +105,7 @@ def check_grammar(uploaded_file_location):
         return enhanced_matches, full_text, text_blocks
 
     except Exception as e:
-        logger.error(f"Error in enhanced check_grammar: {str(e)}", exc_info=True)
+        logger.error(f"Error in adjusted check_grammar: {str(e)}", exc_info=True)
         return [], "", []
 
 def insert_database(event_id, thesis_id, file_location, result, grade, annotation_file_location=None):
