@@ -224,6 +224,7 @@ INSERT INTO public.user (id, full_name, password, type_id) VALUES ('ITDSIU20032'
 INSERT INTO public.user (id, full_name, password, type_id) VALUES ('ITDSIU20056', 'Nguyen Thanh Binh', '01062002', 3);
 INSERT INTO public.user (id, full_name, password, type_id) VALUES ('ITITIU20252', 'Phan Ngoc Dong Minh', '15102002', 3);
 INSERT INTO public.user (id, full_name, password, type_id) VALUES ('ITITIU20338', 'Tran Thi Ngoc Tu', '20112002', 3);
+INSERT INTO public.user (id, full_name, password, type_id) VALUES ('ITITIU20188', 'Le Quy Minh Duc', '22092002', 3);
 
 INSERT INTO public.user (id, full_name, password, type_id) VALUES ('ITITEACH001', 'Tran Thanh Tung', '123456789', 2);
 INSERT INTO public.user (id, full_name, password, type_id) VALUES ('ITITEACH002', 'Nguyen Van Sinh', '123456789', 2);
@@ -261,3 +262,4 @@ INSERT INTO public.student (student_id, instructor_id) VALUES ('ITDSIU20032', 'I
 INSERT INTO public.student (student_id, instructor_id) VALUES ('ITDSIU20056', 'ITITEACH010');
 INSERT INTO public.student (student_id, instructor_id) VALUES ('ITITIU20252', 'ITITEACH011');
 INSERT INTO public.student (student_id, instructor_id) VALUES ('ITITIU20338', 'ITITEACH006');
+INSERT INTO public.student (student_id, instructor_id) VALUES ('ITITIU20188', 'ITITEACH001');
