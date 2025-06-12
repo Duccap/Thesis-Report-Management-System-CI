@@ -126,7 +126,11 @@ def extract_table_section_titles(uploaded_file_location):
                 for title in section:
                     title = title.group().strip("\n\t ")
                     section_title = title.split(" ")[0]
-                    page_num = int(title.split(" ")[-1])
+                    match = re.search(r"(\d+)\s*$", title)
+                    if match:
+                        page_num = int(match.group(1))
+                    else:
+                        continue
 
                     element = {"title": section_title, "page": page_num}
                     table_section_titles.append(element)
@@ -189,6 +193,7 @@ def insert_database(event_id, thesis_id, file_location, result, grade):
 
 
 def output_file(cloud_file_location):
+    print("[DEBUG] Starting output_file function", flush=True)
     start_time = timeit.default_timer()
 
     event_id = str(uuid.uuid4())
@@ -196,36 +201,59 @@ def output_file(cloud_file_location):
     service_type = os.environ.get("APP_NAME")
     thesis_id = file_name
 
+    print(f"[DEBUG] event_id: {event_id}", flush=True)
+    print(f"[DEBUG] file_name: {file_name}", flush=True)
+    print(f"[DEBUG] service_type: {service_type}", flush=True)
+    print(f"[DEBUG] thesis_id: {thesis_id}", flush=True)
+
     producer = Producer()
 
     uploaded_file_location = get_file_from_bucket(cloud_file_location)
+    print(f"[DEBUG] uploaded_file_location: {uploaded_file_location}", flush=True)
     producer.publish_status(event_id, thesis_id, service_type, "Processing")
 
     try:
+        print("[DEBUG] Extracting chapter titles...", flush=True)
         chapter_titles = extract_chapter_titles(uploaded_file_location)
-        table_chapter_titles = extract_table_chapter_titles(uploaded_file_location)
+        print(f"[DEBUG] chapter_titles: {chapter_titles}", flush=True)
 
+        print("[DEBUG] Extracting table chapter titles...", flush=True)
+        table_chapter_titles = extract_table_chapter_titles(uploaded_file_location)
+        print(f"[DEBUG] table_chapter_titles: {table_chapter_titles}", flush=True)
+
+        print("[DEBUG] Extracting section titles...", flush=True)
         section_titles = extract_section_titles(uploaded_file_location)
+        print(f"[DEBUG] section_titles: {section_titles}", flush=True)
+
+        print("[DEBUG] Extracting table section titles...", flush=True)
         table_section_titles = extract_table_section_titles(uploaded_file_location)
+        print(f"[DEBUG] table_section_titles: {table_section_titles}", flush=True)
         
+        print("[DEBUG] Checking chapter titles...", flush=True)
         (incorrect_chapter_titles, missing_chapter_titles) = check_chapter_titles(chapter_titles, table_chapter_titles)
+        print(f"[DEBUG] incorrect_chapter_titles: {incorrect_chapter_titles}", flush=True)
+        print(f"[DEBUG] missing_chapter_titles: {missing_chapter_titles}", flush=True)
+
+        print("[DEBUG] Checking section titles...", flush=True)
         (incorrect_section_titles, missing_section_titles) = check_section_titles(section_titles, table_section_titles)
+        print(f"[DEBUG] incorrect_section_titles: {incorrect_section_titles}", flush=True)
+        print(f"[DEBUG] missing_section_titles: {missing_section_titles}", flush=True)
         
         output = "Table of content page number check.\nThis service detects if chapter and section titles are at the correct pages according to the table of content.\n"
         
         output += "\nChapter titles from table of content:\n"
         for chapter in table_chapter_titles:
-            output += chapter["title"] + "....................." + str(chapter["page"]) + "\n"
+            output += f"{chapter['title']}.....................{str(chapter['page'])}\n"
 
-        output += "\nSection titles from table of content:\n"
+        output += f"\nSection titles from table of content:\n"
         for section in table_section_titles:
-            output += section["title"] + "....................." + str(section["page"]) + "\n"
+            output += f"{section['title']}.....................{str(section['page'])}\n"
 
         count = len(chapter_titles) + len(section_titles)
 
-        output += "\nResults:\n"
+        output += f"\nResults:\n"
         if len(incorrect_chapter_titles) > 0:
-            output += "Chapter titles with incorrect page numbers:\n"
+            output += f"Chapter titles with incorrect page numbers:\n"
             for title in incorrect_chapter_titles:
                 count -= 0.3
                 output += title + "\n"
@@ -260,20 +288,27 @@ def output_file(cloud_file_location):
 
         grade = int(round(count * 100 / (len(chapter_titles) + len(section_titles)), 0))
         result = "Pass" if grade > 50 else "Fail"
-        output += "Percentage: " + str(grade) + "%\n"
-        output += "Service result: " + result + "\n"
+        output += f"Percentage: {grade}%\n"
+        output += f"Service result: {result}\n"
+
+        print(f"[DEBUG] output: {output}", flush=True)
+        print(f"[DEBUG] grade: {grade}, result: {result}", flush=True)
 
         output_file_location = write_to_bucket(file_name, output)
-        print("\nTime for " + os.environ.get("APP_NAME") + " to process file " + file_name + " is " + str(timeit.default_timer() - start_time) + "\n", flush=True)
+        print(f"\nTime for {os.environ.get('APP_NAME', 'Unknown')} to process file {file_name} is {timeit.default_timer() - start_time:.2f} seconds\n", flush=True)
 
-        print("finished uploading to bucket for " + os.environ.get("APP_NAME"), flush=True)
+        print(f"finished uploading to bucket for {os.environ.get('APP_NAME', 'Unknown')}", flush=True)
 
         remove_file_from_dir(uploaded_file_location)
+        print(f"[DEBUG] Removed file from dir: {uploaded_file_location}", flush=True)
         
         insert_database(event_id, thesis_id, output_file_location, result, grade)
+        print(f"[DEBUG] Inserted result into database", flush=True)
 
         producer.publish_message(event_id, thesis_id, service_type, output_file_location, result, grade)
+        print(f"[DEBUG] Published message to producer", flush=True)
 
-        print("Processing complete in " + os.environ.get("APP_NAME"), flush=True)
-    except:
+        print(f"Processing complete in {os.environ.get('APP_NAME', 'Unknown')}", flush=True)
+    except Exception as e:
+        print(f"[DEBUG] Exception occurred: {e}", flush=True)
         producer.publish_status(event_id, thesis_id, service_type, "Service error")

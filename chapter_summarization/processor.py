@@ -1,3 +1,4 @@
+
 import re
 import os
 import uuid
@@ -17,6 +18,16 @@ from sumy.summarizers.lsa import LsaSummarizer as Summarizer
 
 from file_manager import get_file_from_bucket, remove_file_from_dir, write_to_bucket, get_text_from_bucket
 
+import nltk
+import os
+
+# Optional: use a custom path if running in Docker or non-standard env
+nltk_data_path = "/usr/local/nltk_data"
+os.makedirs(nltk_data_path, exist_ok=True)
+
+nltk.download("punkt", download_dir=nltk_data_path)
+nltk.download("punkt_tab", download_dir=nltk_data_path)
+nltk.data.path.append(nltk_data_path)
 load_dotenv()
 
 def extract_text(uploaded_file_location):
@@ -183,32 +194,52 @@ def output_file(cloud_file_location):
 
     producer = Producer()
 
+    print(f"[DEBUG] Downloading file from bucket: {cloud_file_location}", flush=True)
     uploaded_file_location = get_file_from_bucket(cloud_file_location)
+    print(f"[DEBUG] Local file path: {uploaded_file_location}", flush=True)
     producer.publish_status(event_id, thesis_id, service_type, "Processing")
     
     try:
+        print("[DEBUG] Extracting chapter titles...", flush=True)
         chapter_titles = extract_chapter_titles(uploaded_file_location)
+        print(f"[DEBUG] Found chapter titles: {chapter_titles}", flush=True)
+
+        print("[DEBUG] Extracting section titles...", flush=True)
         section_titles = extract_section_titles(uploaded_file_location)
+        print(f"[DEBUG] Found section titles: {section_titles}", flush=True)
 
+        print("[DEBUG] Extracting text from PDF...", flush=True)
         text = extract_text(uploaded_file_location)
+        print(f"[DEBUG] Extracted text length: {len(text)}", flush=True)
 
+        print("[DEBUG] Extracting chapter content...", flush=True)
         chapter_content = extract_chapter_content(text, chapter_titles, section_titles)
+        print(f"[DEBUG] Extracted chapter content count: {len(chapter_content)}", flush=True)
+
+        print("[DEBUG] Generating summaries...", flush=True)
         output = get_summaries(chapter_content)
+        print(f"[DEBUG] Output summary length: {len(output)}", flush=True)
         
         result = "None"
 
+        print("[DEBUG] Writing output to bucket...", flush=True)
         output_file_location = write_to_bucket(file_name, output)
+        print(f"[DEBUG] Output file location: {output_file_location}", flush=True)
 
         print("\nTime for " + os.environ.get("APP_NAME") + " to process file " + file_name + " is " + str(timeit.default_timer() - start_time) + "\n", flush=True)
 
         print("finished uploading to bucket for " + os.environ.get("APP_NAME"), flush=True)
 
+        print("[DEBUG] Removing local file...", flush=True)
         remove_file_from_dir(uploaded_file_location)
         
+        print("[DEBUG] Inserting result into database...", flush=True)
         insert_database(event_id, thesis_id, output_file_location, result)
 
+        print("[DEBUG] Publishing message to producer...", flush=True)
         producer.publish_message(event_id, thesis_id, service_type, output_file_location, result)
 
         print("Processing complete in " + os.environ.get("APP_NAME"), flush=True)
-    except:
+    except Exception as e:
+        print(f"[ERROR] Exception occurred: {e}", flush=True)
         producer.publish_status(event_id, thesis_id, service_type, "Service error")
